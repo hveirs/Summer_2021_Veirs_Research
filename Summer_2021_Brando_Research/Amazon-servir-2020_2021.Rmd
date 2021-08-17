@@ -1,0 +1,306 @@
+---
+title: "Fires Amazon 2020-2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(knitr)
+library(tibbletime)
+library(viridis)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(raster)
+library(sf)
+library(plotly)
+
+####
+####
+####
+
+#working directory
+wd =  "/Users/Hailey Viera/Documents/Summer_2021_Brando_Research"
+
+####
+####
+####
+
+#2019
+#fires_e_2019 = st_read(file.path(wd, "Neils/Fire_events_by_type/2019/Fire_events_by_type.shp"))
+#fires_d_2019 = st_read(file.path(wd, "Neils/Fire_detection_by_type/2019/Fire_detections_by_type.shp"))
+
+####
+####
+####
+
+#2020
+fires_20 <- st_read(file.path(wd, "/Drive_DashData_2020/fire_atlas_events_20200817.shp"))
+#2021
+fires_21 <- st_read(file.path(wd, "/Drive_DashData_2021/fire_atlas_events_20210711.shp"))
+
+#Weekly August-September 2021
+fires_21_0815 <- st_read(file.path(wd, "/Weekly_Data/W8_15_2021/fire_atlas_events_20210815.shp"))
+
+fires_21_0815= fires_21_0815 %>% 
+  rename(start_date=start_DOY,
+         last_date=last_DOY)
+
+#fires_d <- st_read(file.path(wd, "Neils/Fire_detection_by_type/2020/fire_atlas_viirs_detections_20200817.shp"))
+
+#fires <- fires_20 %>%
+#  bind_rows(fires_20, fires_21_0815)
+####
+####
+####
+
+#Shapefiles Brazil
+brazil_s <- st_read(file.path(wd, "Shapefiles/Bramzstates_polyline.shp"))
+abasin <- st_read(file.path(wd, "Shapefiles/panamazonpoly.shp"))
+
+```
+
+```{r}
+#states <- fires_e[brazil_s, ]
+#amazon <- fires_e[abasin, ]
+
+aa <- fires %>%  
+  filter(biome == 1) %>%
+  
+  mutate(
+    Fire = case_when(
+      fire_type == 1 ~ "savanna and grassland",
+      fire_type == 2 ~ "small clearing and agriculture",
+      fire_type == 3 ~ "understory",
+      fire_type == 4 ~ "deforestation"
+  ),
+  start_date = ymd(start_date),
+  last_date = ymd(last_date),
+  Year = year(start_date),
+  Year = ifelse(is.na(Year), 2021, Year)
+  )
+```
+
+
+```{r}
+
+fig1_Wk1 <- 
+  ggplot(data = aa)+
+  #geom_sf(data = abasin, fill = NA) +
+  #geom_sf(data = brazil_s, fill = NA, color = "gray") +
+  geom_sf(aes(fill = start_DOY, color = start_DOY), alpha = .2) +
+  scale_fill_viridis(option = "magma") +
+  scale_color_viridis(option = "magma") +
+  facet_wrap(~Year) +
+  theme_minimal()
+
+print(fig1_Wk1)
+```
+
+```{r}
+
+rolling_mean <- rollify(mean, window = 7)
+
+calc_fire_event <- 
+  as_tibble(aa) %>% 
+  #rename(start_date = start_DOY) %>%
+  filter(start_DOY >= 1, is_active == 1) %>%
+  group_by(start_DOY, Fire, Year) %>%
+  summarise(active_fires = sum(fire_count, na.rm=T)) %>% 
+  group_by(Fire, Year) %>%
+  mutate(mov_avg = rolling_mean(active_fires))  %>%
+  ungroup()
+```
+
+
+```{r}
+
+fig2_Wk1 <- calc_fire_event %>%
+  ggplot() +
+  geom_area(aes(x = start_DOY, 
+             y = active_fires, 
+             fill = Fire), alpha = 0.8) +
+  #scale_fill_viridis(discrete = TRUE, option="E") +
+  scale_fill_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  labs(title = "Amazon fires") +
+  ylab("Active fire counts") +
+  xlab("Date") +
+  #scale_x_date(date_labels = "%b %d", date_breaks = "7 days")+
+  theme_minimal() +
+  facet_wrap(~Year) +
+  theme(legend.position = c(0.2, 0.4)) 
+  
+#ggplotly(fig_2)
+
+print(fig2_Wk1)
+
+```
+
+
+
+```{r}
+
+fig3_wk1 <- calc_fire_event %>%
+  ggplot() +
+  geom_area(aes(x = start_DOY, 
+             y = mov_avg, 
+             fill = Fire), alpha = 0.8) +
+  #scale_fill_viridis(discrete = TRUE, option="E") +
+  scale_fill_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  labs(title = "Amazon fires (7-day moving average)") +
+  ylab("Active fire counts") +
+  xlab("Date") +
+#  scale_x_date(date_labels = "%b %d", date_breaks = "7 days")+
+  theme_minimal() +
+  facet_wrap(~Year) +
+  theme(legend.position = c(0.2, 0.4)) 
+  
+ggplotly(fig3_wk1)
+
+print(fig3_wk1)
+```
+
+
+```{r}
+fig4_wk1 <- calc_fire_event %>%
+  #filter(start_date >= ymd("2020-07-01")) %>%
+  ggplot() +
+  geom_col(aes(x = start_DOY, 
+               y = active_fires,
+               #color = Fire,
+               fill = Fire), position = "dodge", color = NA, alpha = .3) +
+  geom_line(aes(x = start_DOY, 
+             y = mov_avg,
+             color = Fire), lwd = 1.25) +
+  #scale_fill_viridis(discrete = TRUE, option="E") +
+  #scale_fill_manual(values = c("orange", "blue", "darkgreen", "darkred"))+
+  #scale_x_date(date_labels = "%b %d", date_breaks = "7 days")+
+  scale_fill_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  scale_color_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  labs(title = "Amazon fires (7-day moving average)") +
+  ylab("Active fire counts") +
+  xlab("Date") +
+  facet_grid(Year~Fire) +
+  theme_minimal() +
+  theme(legend.position = "none") 
+
+ggplotly(fig4_wk1)
+
+print(fig4_wk1)
+```
+
+```{r}
+fig4b_wk1 <- calc_fire_event %>%
+  #filter(start_date >= ymd("2020-07-01")) %>%
+  ggplot() +
+  #geom_col(aes(x = start_DOY, 
+  #             y = active_fires,
+  #             #color = Fire,
+  #             fill = Fire), position = "dodge", color = NA, alpha = .3) +
+  #geom_line(aes(x = start_DOY, 
+  #           y = mov_avg,
+  #           linetype = as.factor(Year),
+  #           color = Fire), lwd = 0.55) +
+    geom_point(aes(x = start_DOY, 
+             y = mov_avg,
+             shape = as.factor(Year),
+             color = as.factor(Year)), size = 0.4) +
+
+  #scale_fill_viridis(discrete = TRUE, option="E") +
+  #scale_fill_manual(values = c("orange", "blue", "darkgreen", "darkred"))+
+  #scale_x_date(date_labels = "%b %d", date_breaks = "7 days")+
+  #scale_fill_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  #scale_color_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  labs(title = "Amazon fires (7-day moving average)") +
+  ylab("Active fire counts") +
+  xlab("Date") +
+  facet_wrap(~Fire) +
+  theme_minimal() +
+  theme(legend.position = "none") 
+
+ggplotly(fig4b_wk1)
+
+print(fig4b_wk1)
+```
+
+
+```{r}
+library(tidyr)
+library(kableExtra)
+library(formattable)
+
+rr = as_tibble(aa) %>% 
+  filter(start_date >= ymd("2021-08-01"), is_active == 1) %>%
+  group_by(start_date, Fire) %>%
+  summarise(active_fires = sum(fire_count, na.rm=T)) %>% 
+  group_by(Fire) %>%
+  mutate(mov_avg = rolling_mean(active_fires)) %>%
+  filter(start_date %in% c(max(start_date), max(start_date)-14)) %>%
+  arrange(Fire, start_date) %>%
+  mutate(Date = floor_date(start_date, "week"),
+         mov_avg = round(mov_avg)) %>%
+  dplyr::select(-active_fires, -start_date) %>%
+  pivot_wider(names_from = Date, values_from = mov_avg) %>%
+  ungroup()
+
+names(rr) = c("Fire", "Two weeks ago", "This week")
+
+rr <- rr %>% 
+  tibble::add_row(Fire = "Total",
+                  `Two weeks ago` = sum(rr$`Two weeks ago`),
+                  `This week` = sum(rr$`This week`))
+
+rr$Perc_change = round(((rr$`This week` - rr$`Two weeks ago`) / rr$`Two weeks ago`)*100, 0)
+
+#rr$Perc_change = color_tile("white", "orange")(rr$Perc_change)
+
+rr$Perc_change <- ifelse(
+  rr$Perc_change > 0,
+  cell_spec(rr$Perc_change, color = "darkred", bold = T),
+  cell_spec(rr$Perc_change, color = "darkblue", bold = F)
+)
+
+
+
+kbl(rr, escape = F) %>%
+  kable_styling("hover", full_width = F) %>%
+  row_spec(5, bold = T, color = "white", background = "grey")
+
+
+```
+
+
+```{r}
+
+fig5_wk1<- as_tibble(aa) %>% 
+  filter(is_active == 1,
+         start_date >= ymd("2021-05-01")) %>%
+  group_by(start_date, Fire) %>%
+  summarise(frp = mean(frp, na.rm=TRUE)) %>% 
+  group_by(Fire) %>%
+  mutate(mov_avg = rolling_mean(frp)) %>%
+  ggplot() +
+  geom_line(aes(x = start_date,
+                color = Fire,
+             y = mov_avg)) +
+  geom_col(aes(x = start_date,
+               fill = Fire,
+               y = frp), position = "dodge", alpha = .3) +
+  scale_x_date(date_labels = "%b %d", date_breaks = "15 days")+
+  scale_fill_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  scale_color_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  labs(title = "Fire radiative power of Amazon fires (7-day moving average)") +
+  ylab("FRP") +
+  xlab("Date") +
+  facet_wrap(~Fire) +
+  theme_minimal() +
+  theme(legend.position = "none") 
+
+ggplotly(fig5_wk1)
+
+#print(fig5_wk1)
+```
+
