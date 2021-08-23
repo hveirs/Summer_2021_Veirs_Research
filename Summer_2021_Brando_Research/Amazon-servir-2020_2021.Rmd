@@ -44,15 +44,16 @@ fires_21 <- st_read(file.path(wd, "/Drive_DashData_2021/fire_atlas_events_202107
 
 #Weekly August-September 2021
 fires_21_0815 <- st_read(file.path(wd, "/Weekly_Data/W8_15_2021/fire_atlas_events_20210815.shp"))
+fires_21_0822 <- st_read(file.path(wd, "/Weekly_Data/W8_22_2021/fire_atlas_events_20210822.shp"))
 
-fires_21_0815= fires_21_0815 %>% 
-  rename(start_date=start_DOY,
-         last_date=last_DOY)
+#fires_21_0815= fires_21_0815 %>% 
+#  rename(start_DOY=start_date,
+#         last_DOY=last_date)
 
 #fires_d <- st_read(file.path(wd, "Neils/Fire_detection_by_type/2020/fire_atlas_viirs_detections_20200817.shp"))
 
-#fires <- fires_20 %>%
-#  bind_rows(fires_20, fires_21_0815)
+fires <- fires_20 %>%
+  bind_rows(fires_20, fires_21_0822)
 ####
 ####
 ####
@@ -87,17 +88,17 @@ aa <- fires %>%
 
 ```{r}
 
-fig1_Wk1 <- 
+fig1_Wk2 <- 
   ggplot(data = aa)+
-  #geom_sf(data = abasin, fill = NA) +
-  #geom_sf(data = brazil_s, fill = NA, color = "gray") +
+  geom_sf(data = abasin, fill = NA) +
+  geom_sf(data = brazil_s, fill = NA, color = "gray") +
   geom_sf(aes(fill = start_DOY, color = start_DOY), alpha = .2) +
   scale_fill_viridis(option = "magma") +
   scale_color_viridis(option = "magma") +
   facet_wrap(~Year) +
   theme_minimal()
 
-print(fig1_Wk1)
+print(fig1_Wk2)
 ```
 
 ```{r}
@@ -118,7 +119,7 @@ calc_fire_event <-
 
 ```{r}
 
-fig2_Wk1 <- calc_fire_event %>%
+fig2_Wk2 <- calc_fire_event %>%
   ggplot() +
   geom_area(aes(x = start_DOY, 
              y = active_fires, 
@@ -135,7 +136,7 @@ fig2_Wk1 <- calc_fire_event %>%
   
 #ggplotly(fig_2)
 
-print(fig2_Wk1)
+print(fig2_Wk2)
 
 ```
 
@@ -143,7 +144,7 @@ print(fig2_Wk1)
 
 ```{r}
 
-fig3_wk1 <- calc_fire_event %>%
+fig3_wk2 <- calc_fire_event %>%
   ggplot() +
   geom_area(aes(x = start_DOY, 
              y = mov_avg, 
@@ -158,14 +159,14 @@ fig3_wk1 <- calc_fire_event %>%
   facet_wrap(~Year) +
   theme(legend.position = c(0.2, 0.4)) 
   
-ggplotly(fig3_wk1)
+ggplotly(fig3_wk2)
 
-print(fig3_wk1)
+print(fig3_wk2)
 ```
 
 
 ```{r}
-fig4_wk1 <- calc_fire_event %>%
+fig4_wk2 <- calc_fire_event %>%
   #filter(start_date >= ymd("2020-07-01")) %>%
   ggplot() +
   geom_col(aes(x = start_DOY, 
@@ -187,13 +188,13 @@ fig4_wk1 <- calc_fire_event %>%
   theme_minimal() +
   theme(legend.position = "none") 
 
-ggplotly(fig4_wk1)
+ggplotly(fig4_wk2)
 
-print(fig4_wk1)
+print(fig4_wk2)
 ```
 
 ```{r}
-fig4b_wk1 <- calc_fire_event %>%
+fig4b_wk2 <- calc_fire_event %>%
   #filter(start_date >= ymd("2020-07-01")) %>%
   ggplot() +
   #geom_col(aes(x = start_DOY, 
@@ -221,9 +222,9 @@ fig4b_wk1 <- calc_fire_event %>%
   theme_minimal() +
   theme(legend.position = "none") 
 
-ggplotly(fig4b_wk1)
+ggplotly(fig4b_wk2)
 
-print(fig4b_wk1)
+print(fig4b_wk2)
 ```
 
 
@@ -233,7 +234,7 @@ library(kableExtra)
 library(formattable)
 
 rr = as_tibble(aa) %>% 
-  filter(start_date >= ymd("2021-08-01"), is_active == 1) %>%
+  filter(start_date >= ymd("2020-05-01"), is_active == 1) %>%
   group_by(start_date, Fire) %>%
   summarise(active_fires = sum(fire_count, na.rm=T)) %>% 
   group_by(Fire) %>%
@@ -275,7 +276,7 @@ kbl(rr, escape = F) %>%
 
 ```{r}
 
-fig5_wk1<- as_tibble(aa) %>% 
+fig5_wk2<- as_tibble(aa) %>% 
   filter(is_active == 1,
          start_date >= ymd("2021-05-01")) %>%
   group_by(start_date, Fire) %>%
@@ -299,8 +300,11 @@ fig5_wk1<- as_tibble(aa) %>%
   theme_minimal() +
   theme(legend.position = "none") 
 
-ggplotly(fig5_wk1)
+ggplotly(fig5_wk2)
 
-#print(fig5_wk1)
+#print(fig5_wk2)
 ```
 
+```{r}
+
+```
