@@ -315,7 +315,7 @@ ggplotly(fig5_wk2)
 #Data separated by whether or not it is in the Amazon biome (similar to the aa variable)
 bb <- fires_21_0822 %>%  
   mutate(
-    State = case_when(
+    Amazon = case_when(
       biome == 1 ~ "inside Amazon Biome"
       biome == 0 ~ "outside Amazon Biome"
   ),
