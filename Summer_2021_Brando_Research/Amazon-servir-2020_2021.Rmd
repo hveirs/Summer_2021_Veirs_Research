@@ -52,8 +52,13 @@ fires_21_0822 <- st_read(file.path(wd, "/Weekly_Data/W8_22_2021/fire_atlas_event
 
 #fires_d <- st_read(file.path(wd, "Neils/Fire_detection_by_type/2020/fire_atlas_viirs_detections_20200817.shp"))
 
+#Variable for current fires (current week)
 fires <- fires_20 %>%
   bind_rows(fires_20, fires_21_0822)
+  
+#Variable for previous week
+fires_prev <- fires_20 %>%
+  bind_rows(fires_20, fires_21_0815)
 ####
 ####
 ####
@@ -306,6 +311,22 @@ ggplotly(fig5_wk2)
 ```
 
 ```{r}
-#Figure for displaying/comparing the different areas/states and the number of fires in each.
+#Figure for displaying/comparing the number of fires inside and outside the Amazon biome.
+#Data separated by whether or not it is in the Amazon biome (similar to the aa variable)
+bb <- fires_21_0822 %>%  
+  mutate(
+    State = case_when(
+      biome == 1 ~ "inside Amazon Biome"
+      biome == 0 ~ "outside Amazon Biome"
+  ),
+  start_date = ymd(start_date),
+  last_date = ymd(last_date),
+  Year = year(start_date),
+  Year = ifelse(is.na(Year), 2021, Year)
+  )
 #fig6_wk2 <- 
+```
+```{r}
+#Figure for displaying/comparing the different areas/states and the number of fires in each.
+
 ```
