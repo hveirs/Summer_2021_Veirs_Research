@@ -306,5 +306,6 @@ ggplotly(fig5_wk2)
 ```
 
 ```{r}
-
+#Figure for displaying/comparing the different areas/states and the number of fires in each.
+#fig6_wk2 <- 
 ```
