@@ -316,17 +316,30 @@ ggplotly(fig5_wk2)
 bb <- fires_21_0822 %>%  
   mutate(
     Amazon = case_when(
-      biome == 1 ~ "inside Amazon Biome"
-      biome == 0 ~ "outside Amazon Biome"
+      biome == 1 ~ "inside"
+      biome == 0 ~ "outside"
   ),
   start_date = ymd(start_date),
   last_date = ymd(last_date),
   Year = year(start_date),
   Year = ifelse(is.na(Year), 2021, Year)
   )
+  
+  calc_fire_biome <- 
+  as_tibble(bb) %>% 
+  #rename(start_date = start_DOY) %>%
+  filter(start_DOY >= 1, is_active == 1) %>%
+  group_by(start_DOY, Amazon, Year) %>%
+  #summarise(active_fires = sum(fire_count, na.rm=T)) %>% 
+  #group_by(Fire, Year) %>%
+  mutate(mov_avg = rolling_mean(active_fires))  %>%
+  ungroup()
+  
 #fig6_wk2 <- 
 ```
 ```{r}
 #Figure for displaying/comparing the different areas/states and the number of fires in each.
+#Brazil cropped area
+#brazil_crop <- crop(x = "data/raster of interest", y = brazil_s)
 
 ```
