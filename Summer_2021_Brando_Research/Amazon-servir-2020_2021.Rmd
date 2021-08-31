@@ -331,7 +331,7 @@ kbl(rr, escape = F) %>%
 
 ```{r}
 
-fig5_wk2<- as_tibble(aa) %>% 
+fig5_wk3<- as_tibble(aa) %>% 
   filter(is_active == 1,
          start_date >= ymd("2021-05-01")) %>%
   group_by(start_date, Fire) %>%
@@ -355,9 +355,9 @@ fig5_wk2<- as_tibble(aa) %>%
   theme_minimal() +
   theme(legend.position = "none") 
 
-ggplotly(fig5_wk2)
+ggplotly(fig5_wk3)
 
-#print(fig5_wk2)
+print(fig5_wk3)
 ```
 
 ```{r}
