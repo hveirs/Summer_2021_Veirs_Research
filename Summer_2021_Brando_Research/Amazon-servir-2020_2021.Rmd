@@ -296,7 +296,7 @@ rr = as_tibble(aa) %>%
   mutate(mov_avg = rolling_mean(active_fires)) %>%
   filter(start_DOY %in% c(max(start_DOY), max(start_DOY)-14)) %>%
   arrange(Fire, start_DOY) %>%
-  mutate(Date = floor_date(start_DOY, "week"),
+  mutate(Date = start_DOY,
          mov_avg = round(mov_avg)) %>%
   dplyr::select(-active_fires, -start_date) %>%
   pivot_wider(names_from = Date, values_from = mov_avg) %>%
