@@ -388,10 +388,11 @@ calc_fire_biome <-
 #fig6_wk2 <- 
 ```
 ```{r}
+library(rgdal)
 #Figure for displaying/comparing the different areas/states and the number of fires in each.
 #Brazil cropped area
-#Use the raster format file, the .prj file
-fires_raster <- st_read(file.path(wd, "/Weekly_Data/W8_29_2021/fire_atlas_events_20210829.shp"))
+#Use the raster format file, the .shp file
+fires_raster <- readOGR(file.path(wd, "/Weekly_Data/W8_29_2021/fire_atlas_events_20210829.shp"))
 
 brazil_crop <- crop(x = fires_raster, y = brazil_s)
 
