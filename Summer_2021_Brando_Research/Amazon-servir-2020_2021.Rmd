@@ -49,6 +49,8 @@ fires_21_0822 <- st_read(file.path(wd, "/Weekly_Data/W8_22_2021/fire_atlas_event
 
 fires_21_0829 <- st_read(file.path(wd, "/Weekly_Data/W8_29_2021/fire_atlas_events_20210829.shp"))
 
+fires_21_0904 <- st_read(file.path(wd, "/Weekly_Data/W9_04_2021/fire_atlas_events_20210904.shp"))
+
 #fires_21_0815= fires_21_0815 %>% 
 #  rename(start_DOY=start_date,
 #         last_DOY=last_date)
@@ -57,11 +59,12 @@ fires_21_0829 <- st_read(file.path(wd, "/Weekly_Data/W8_29_2021/fire_atlas_event
 
 #Variable for current fires (current week)
 fires <- fires_20 %>%
-  bind_rows(fires_20, fires_21_0829)
+  bind_rows(fires_20, fires_21_0904)
   
 #Variable for previous week
 fires_prev <- fires_20 %>%
-  bind_rows(fires_20, fires_21_0822)
+  bind_rows(fires_20, fires_21_0829)
+  
 ####
 ####
 ####
@@ -125,7 +128,7 @@ calc_fire_event_prev <-
 
 ```{r}
 
-fig1_Wk2 <- 
+fig1_Wk4 <- 
   ggplot(data = aa)+
   geom_sf(data = abasin, fill = NA) +
   geom_sf(data = brazil_s, fill = NA, color = "gray") +
@@ -135,7 +138,7 @@ fig1_Wk2 <-
   facet_wrap(~Year) +
   theme_minimal()
 
-print(fig1_Wk2)
+print(fig1_Wk4)
 ```
 
 ```{r}
@@ -156,7 +159,7 @@ calc_fire_event <-
 
 ```{r}
 #Current week's figure(s)
-fig2_Wk3 <- calc_fire_event %>%
+fig2_Wk4 <- calc_fire_event %>%
   ggplot() +
   geom_area(aes(x = start_DOY, 
              y = active_fires, 
@@ -171,9 +174,9 @@ fig2_Wk3 <- calc_fire_event %>%
   facet_wrap(~Year) +
   theme(legend.position = c(0.2, 0.4)) 
   
-ggplotly(fig2_Wk3)
+ggplotly(fig2_Wk4)
 
-print(fig2_Wk3)
+print(fig2_Wk4)
 
 ```
 
@@ -199,7 +202,7 @@ ggplotly(fig2_prev)
 
 ```{r}
 
-fig3_wk3 <- calc_fire_event %>%
+fig3_wk4 <- calc_fire_event %>%
   ggplot() +
   geom_area(aes(x = start_DOY, 
              y = mov_avg, 
@@ -214,14 +217,14 @@ fig3_wk3 <- calc_fire_event %>%
   facet_wrap(~Year) +
   theme(legend.position = c(0.2, 0.4)) 
   
-ggplotly(fig3_wk3)
+ggplotly(fig3_wk4)
 
-print(fig3_wk3)
+print(fig3_wk4)
 ```
 
 
 ```{r}
-fig4_wk3 <- calc_fire_event %>%
+fig4_wk4 <- calc_fire_event %>%
   #filter(start_date >= ymd("2020-07-01")) %>%
   ggplot() +
   geom_col(aes(x = start_DOY, 
@@ -243,13 +246,13 @@ fig4_wk3 <- calc_fire_event %>%
   theme_minimal() +
   theme(legend.position = "none") 
 
-ggplotly(fig4_wk3)
+ggplotly(fig4_wk4)
 
-print(fig4_wk3)
+print(fig4_wk4)
 ```
 
 ```{r}
-fig4b_wk3 <- calc_fire_event %>%
+fig4b_wk4 <- calc_fire_event %>%
   #filter(start_date >= ymd("2020-07-01")) %>%
   ggplot() +
   #geom_col(aes(x = start_DOY, 
@@ -277,9 +280,9 @@ fig4b_wk3 <- calc_fire_event %>%
   theme_minimal() +
   theme(legend.position = "none") 
 
-ggplotly(fig4b_wk3)
+ggplotly(fig4b_wk4)
 
-print(fig4b_wk3)
+print(fig4b_wk4)
 ```
 
 
@@ -331,7 +334,7 @@ kbl(rr, escape = F) %>%
 
 ```{r}
 
-fig5_wk3<- as_tibble(aa) %>% 
+fig5_wk4<- as_tibble(aa) %>% 
   filter(is_active == 1,
          start_date >= ymd("2021-05-01")) %>%
   group_by(start_date, Fire) %>%
@@ -355,9 +358,9 @@ fig5_wk3<- as_tibble(aa) %>%
   theme_minimal() +
   theme(legend.position = "none") 
 
-ggplotly(fig5_wk3)
+ggplotly(fig5_wk4)
 
-print(fig5_wk3)
+print(fig5_wk4)
 ```
 
 ```{r}
