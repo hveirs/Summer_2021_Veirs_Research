@@ -426,3 +426,10 @@ fires_raster <- readOGR(file.path(wd, "/Weekly_Data/W8_29_2021/fire_atlas_events
 brazil_crop <- crop(x = fires_raster, y = brazil_s)
 
 ```
+
+```{r}
+#Map of fires separated by municipalities in Amazon
+municshape <- st_read(file.path(wd,"Shapefiles/municipalities_amazon_biome.shp"))
+
+
+```
