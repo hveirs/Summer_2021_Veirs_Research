@@ -99,8 +99,8 @@ aa <- fires %>%
 ```
 
 ```{r}
-#Previous weeks' variables:
-aa_prev <- fires_prev %>%  
+#Current 2021 variables:
+aa_2021 <- fires_21_0912 %>%  
   filter(biome == 1) %>%
   
   mutate(
@@ -116,7 +116,7 @@ aa_prev <- fires_prev %>%
   Year = ifelse(is.na(Year), 2021, Year)
   )
 
-calc_fire_event_prev <- 
+calc_fire_event_2021 <- 
   as_tibble(aa_prev) %>% 
   #rename(start_date = start_DOY) %>%
   filter(start_DOY >= 1, is_active == 1) %>%
@@ -180,6 +180,30 @@ ggplotly(fig2_Wk5)
 
 print(fig2_Wk5)
 
+```
+
+```{r}
+#Current (2021) active fire count separated by type of fire
+fig2b_Wk5 <- calc_fire_event %>%
+  ggplot() +
+  #filter(Year == 2021) +
+  geom_area(aes(x = start_DOY, 
+             y = active_fires, 
+             fill = Fire), alpha = 0.8) +
+  #scale_fill_viridis(discrete = TRUE, option="E") +
+  scale_fill_manual(values = c("darkred", "orange", "black", "springgreen4")) +
+  labs(title = "Amazon fires") +
+  ylab("Total active fire counts") +
+  xlab("Date") +
+  #scale_x_date(date_labels = "%b %d", date_breaks = "7 days")+
+  theme_minimal() +
+  #facet_wrap(~Year) +
+  facet_wrap(~Fire, scales = "free_y") +
+  theme(legend.position = c(0.2, 0.4)) 
+  
+ggplotly(fig2b_Wk5)
+
+print(fig2b_Wk5)
 ```
 
 ```{r}
