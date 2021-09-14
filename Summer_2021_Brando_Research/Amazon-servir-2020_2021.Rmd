@@ -429,7 +429,91 @@ brazil_crop <- crop(x = fires_raster, y = brazil_s)
 
 ```{r}
 #Map of fires separated by municipalities in Amazon
+library(knitr)
+library(tibbletime)
+library(viridis)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(raster)
+library(sf)
+library(plotly)
+library(leaftlet)
+
+####
+####
+####
+
+fires_20s <- fires_20 %>% select(intersect(names(fires_20), names(fires_21))) %>% mutate(Year = 2020)
+fires_21s <- fires_21 %>% select(intersect(names(fires_20), names(fires_21))) %>% mutate(Year = 2021)
+
+#setdiff(names(fires_20), names(fires_21))
+       
+fires_s <- bind_rows(fires_20s, fires_21s)
+
 municshape <- st_read(file.path(wd,"Shapefiles/municipalities_amazon_biome.shp"))
+
+####
+####
+####
+
+
+munic <- st_transform(municshape, st_crs(abasin))
+
+sf::sf_use_s2(FALSE)
+fires_munic  <- munic %>% st_join(fires_s)
+
+```
+
+```{r}
+library(geosphere)
+library(units)
+#states <- fires_e[brazil_s, ]
+#amazon <- fires_e[abasin, ]
+#sf::sf_use_s2(TRUE)
+
+aa_muni <- fires_munic %>%  
+  filter(biome == 1) %>%
+  mutate(
+    Fire = case_when(
+      fire_type == 1 ~ "savanna and grassland",
+      fire_type == 2 ~ "small clearing and agriculture",
+      fire_type == 3 ~ "understory",
+      fire_type == 4 ~ "deforestation"
+  )) %>%
+  group_by(Year, uf, nm_municip) %>%
+  summarise(sum_fire = sum(is_active)) %>% ungroup()
+
+data_munic_20 <- aa_muni %>% 
+  mutate(land_m2  = geometry %>% st_zm() %>% st_area(),
+         land_km2 = land_m2/1e8,
+         fire_area = round(sum_fire/land_km2, 2)) %>%
+  filter(Year == 2020)
+  #filter(uf %in% c("AC", "AM"))
+
+data_munic_21 <- aa_muni %>% 
+  mutate(land_m2  = geometry %>% st_zm() %>% st_area(),
+         land_km2 = land_m2/1e8,
+         fire_area = round(sum_fire/land_km2, 2)) %>%
+  filter(Year == 2021)
+  #filter(uf %in% c("AC", "AM"))
+
+bins <- c(0, 0.5, 1.0, 1.5, 2, 2.5, Inf)
+pal <- colorBin("YlOrRd", domain = data_munic_21$fire_area, bins = bins)
+
+
+leaflet(data_munic_20) %>%
+  addPolygons(color = "#444444", weight = 1, smoothFactor = 0.5,
+              #popup = ~as.character(paste(fire_area, ":", nm_municip)),
+              popup = ~as.character(paste(nm_municip, ":", fire_area)),
+              #group = ~Year,
+    opacity = 1.0, fillOpacity = 0.5,
+    fillColor = ~pal(fire_area),
+    #fillColor = ~colorQuantile("YlOrRd", NULL, n = 5)(fire_area),
+    highlightOptions = highlightOptions(color = "white", weight = 2,
+      bringToFront = TRUE)) 
 
 
 ```
+```
+
