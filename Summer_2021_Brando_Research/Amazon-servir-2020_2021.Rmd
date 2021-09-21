@@ -40,7 +40,8 @@ wd =  "/Users/Hailey Viera/Documents/Summer_2021_Brando_Research"
 #2020
 fires_20 <- st_read(file.path(wd, "/Drive_DashData_2020/fire_atlas_events_20200817.shp"))
 #2021
-fires_21 <- st_read(file.path(wd, "/Drive_DashData_2021/fire_atlas_events_20210711.shp"))
+#fires_21 <- st_read(file.path(wd, "/Drive_DashData_2021/fire_atlas_events_20210711.shp"))
+fires_21 <- st_read(file.path(wd, "/Weekly_Data/W9_04_2021/fire_atlas_events_20210904.shp"))
 
 #Weekly August-September 2021
 fires_21_0815 <- st_read(file.path(wd, "/Weekly_Data/W8_15_2021/fire_atlas_events_20210815.shp"))
@@ -53,6 +54,8 @@ fires_21_0904 <- st_read(file.path(wd, "/Weekly_Data/W9_04_2021/fire_atlas_event
 
 fires_21_0912 <- st_read(file.path(wd, "/Weekly_Data/W9_12_2021/fire_atlas_events_20210912.shp"))
 
+fires_21_0920 <- st_read(file.path(wd, "/Weekly_Data/W9_20_2021/fire_atlas_events_20210920.shp"))
+
 #fires_21_0815= fires_21_0815 %>% 
 #  rename(start_DOY=start_date,
 #         last_DOY=last_date)
@@ -61,11 +64,11 @@ fires_21_0912 <- st_read(file.path(wd, "/Weekly_Data/W9_12_2021/fire_atlas_event
 
 #Variable for current fires (current week)
 fires <- fires_20 %>%
-  bind_rows(fires_20, fires_21_0912)
+  bind_rows(fires_20, fires_21_0920)
   
 #Variable for previous week
 fires_prev <- fires_20 %>%
-  bind_rows(fires_20, fires_21_0904)
+  bind_rows(fires_20, fires_21_0912)
   
 ####
 ####
@@ -110,14 +113,14 @@ aa_2021 <- fires_21_0912 %>%
       fire_type == 3 ~ "understory",
       fire_type == 4 ~ "deforestation"
   ),
-  start_date = ymd(start_date),
-  last_date = ymd(last_date),
-  Year = year(start_date),
-  Year = ifelse(is.na(Year), 2021, Year)
+  start_date = start_DOY == 1,
+  last_date = last_DOY,
+  Year = 2021,
+  #Year = ifelse(is.na(Year), 2021, Year)
   )
 
 calc_fire_event_2021 <- 
-  as_tibble(aa_prev) %>% 
+  as_tibble(aa_2021) %>% 
   #rename(start_date = start_DOY) %>%
   filter(start_DOY >= 1, is_active == 1) %>%
   group_by(start_DOY, Fire, Year) %>%
